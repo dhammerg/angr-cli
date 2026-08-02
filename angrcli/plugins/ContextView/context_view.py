@@ -174,6 +174,12 @@ class ContextView(SimStatePlugin):
             return replname
         return str(bv)
 
+    def is_uninitialized(self, bv):
+        return any(
+            isinstance(a, claripy.annotation.UninitializedAnnotation)
+            for a in bv.annotations
+        )
+
     def _color_code_ast(self, bv: claripy.ast.bv.BV) -> Tuple[ColoredString, bool]:
         """
         Converts a bitvector into a string representation that is colored depending on it's type/value and returns
@@ -188,7 +194,7 @@ class ContextView(SimStatePlugin):
         :return Tuple[str, bool]:
         """
         if bv.symbolic:
-            if bv.has_annotation_type(UninitializedAnnotation):
+            if self.is_uninitialized(bv):
                 return Color.grayify(self.__BVtoREG(bv)), False
             return Color.greenify(self.__BVtoREG(bv)), False
         # its concrete
